@@ -51,6 +51,7 @@ class MusicLifeSignupService(MusicLifeBaseService):
         fb_name = kwargs['fb_name']
         fb_image = kwargs['fb_image']
         fb_token = kwargs['fb_token']
+        profile = kwargs['profile']
         
         if email is not None: 
             username = email

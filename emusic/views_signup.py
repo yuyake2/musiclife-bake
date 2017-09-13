@@ -26,6 +26,7 @@ def signup(request):
             image_token = data_parameter_dict.get('oe', None)
             data = data_parameter_dict.get('data', {})
             force = data_parameter_dict.get('force', False)
+            profile = data_parameter_dict.get('profile', None)
         except:
             error_code = 1003
         
@@ -54,9 +55,11 @@ def signup(request):
                                                                   fb_id=fb_id,
                                                                   fb_name=fb_name,
                                                                   fb_image=fb_image_str,
-                                                                  fb_token=fb_token)
+                                                                  fb_token=fb_token,
+                                                                  profile=profile)
 
         if error_code == 0:
+            result['id'] = profile.id
             result['email'] = profile.email
             result['firstname'] = profile.firstname
             result['lastname'] = profile.lastname

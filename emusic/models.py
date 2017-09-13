@@ -34,8 +34,6 @@ class Profile(models.Model):
     username = models.CharField(max_length=512, blank=True)
     fb_id = models.BigIntegerField(blank=True,null=True)
     fb_token = models.CharField(max_length=1024, null=True, blank=True, default=None)
-    fb_name = models.CharField(max_length=512, blank=True)
-    fb_image = models.TextField(blank=True)
     gender = models.IntegerField(choices=MEMBER_GENDER, default=0)
     data = models.TextField(default='null')
     timestamp = models.DateTimeField(auto_now_add=True) 
@@ -88,12 +86,11 @@ class Profile(models.Model):
         from django.conf import settings
 
         result = {}
-        result['profile_id'] = self.id
+        result['id'] = self.id
         result['user_id'] = self.user.id
         result['email'] = self.email
         result['firstname'] = self.firstname
         result['lastname'] = self.lastname
-        # result['fb_image'] = self.fb_image
         result['fb_token'] = self.fb_token
         result['gender'] = self.gender
 
@@ -228,3 +225,54 @@ class Music(models.Model):
             data = {}
         data.update(data_dict)
         self.data = json.dumps(data)
+
+
+class Favorite(models.Model):
+    id = models.BigIntegerField(primary_key=True, blank=True)
+    profile =  models.ForeignKey("Profile", related_name="emusic_profile")
+    music =  models.ForeignKey("Music", related_name="emusic_music")
+    data = models.TextField(default='null')
+    is_active = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self._get_pk_val() is None:
+            from django.conf import settings
+            import time, redis
+            redis_server = settings.REDIS_SERVER
+            self.id = int('%s%s%s'%(int(time.time()), settings.SERVER_NUM, redis_server.incr('emusic_favorite')))
+            super(self.__class__, self).save(*args, **kwargs)
+        else:
+            super(self.__class__, self).save(*args, **kwargs)
+
+    def get_data_json(self, key=None, default=None):
+        import json
+
+        try:
+            type(self.data_json)
+        except:
+            try:
+                self.data_json = json.loads(self.data)
+                if self.data_json is None:
+                    self.data_json = {}
+            except:
+                self.data_json = {}
+
+        if key is not None:
+            if key in self.data_json:
+                return self.data_json[key]
+            else:
+                return default
+
+        return self.data_json
+
+    def update_data(self, data_dict):
+        import json
+
+        data = self.get_data_json()
+        if type(data) == type(None):
+            data = {}
+        data.update(data_dict)
+        self.data = json.dumps(data)
+
+     

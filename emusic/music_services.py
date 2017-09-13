@@ -72,3 +72,22 @@ class MusicListService(MusicBaseService):
         music_dict['image'] = image
 
         return music_dict
+
+class FavoriteMusicService(MusicBaseService):
+    def _do_execute(self, **kwargs):
+        from emusic.models import Favorite, Profile, Music
+        request = kwargs['request']
+        profile_id = kwargs['profile_id']
+        music_id = kwargs['music_id']
+        is_active = kwargs['is_active']
+
+        if not Favorite.objects.filter(profile__id=profile_id).exists():
+            print 'n'
+            fav_music = Favorite(profile__id=profile_id,
+                                 music__id=music_id,
+                                 is_active=is_active)
+            fav_music.save()
+        else:
+            print 'h'
+                        
+        
